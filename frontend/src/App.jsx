@@ -1,122 +1,169 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [mode, setMode] = useState('login')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    if (mode === 'login') {
+      alert(`Вход с данными: ${email}`)
+      // Здесь в будущем будет запрос к твоему database.py
+    } else {
+      if (password !== confirmPassword) {
+        alert('Пароли не совпадают!')
+        return
+      }
+      alert(`Регистрация пользователя: ${email}`)
+    }
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Hello world</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div style={styles.container}>
+      <div style={styles.card}>
+        <h2 style={styles.title}>
+          {mode === 'login' ? 'Войти в аккаунт' : 'Регистрация'}
+        </h2>
 
-      <div className="ticks"></div>
+        <form onSubmit={handleSubmit} style={styles.form}>
+          <div style={styles.inputGroup}>
+            <label style={styles.label}>Email / Логин</label>
+            <input
+              type="email"
+              placeholder="example@mail.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              style={styles.input}
+            />
+          </div>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+          <div style={styles.inputGroup}>
+            <label style={styles.label}>Пароль</label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              style={styles.input}
+            />
+          </div>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+          {/* Если режим регистрации, показываем дополнительное поле */}
+          {mode === 'register' && (
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Повторите пароль</label>
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                style={styles.input}
+              />
+            </div>
+          )}
+
+          <button type="submit" style={styles.button}>
+            {mode === 'login' ? 'Войти' : 'Создать аккаунт'}
+          </button>
+        </form>
+
+        <div style={styles.footer}>
+          {mode === 'login' ? (
+            <p>
+              Нет аккаунта?{' '}
+              <span style={styles.link} onClick={() => setMode('register')}>
+                Зарегистрироваться
+              </span>
+            </p>
+          ) : (
+            <p>
+              Уже есть аккаунт?{' '}
+              <span style={styles.link} onClick={() => setMode('login')}>
+                Войти
+              </span>
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
   )
+}
+
+// Простые встроенные стили, чтобы форма выглядела аккуратно
+const styles = {
+  container: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: '80vh',
+    fontFamily: 'Arial, sans-serif'
+  },
+  card: {
+    background: '#1a1a1a',
+    padding: '30px',
+    borderRadius: '12px',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+    width: '100%',
+    maxWidth: '400px',
+    textAlign: 'left',
+    border: '1px solid #333'
+  },
+  title: {
+    marginBottom: '20px',
+    textAlign: 'center',
+    color: '#fff'
+  },
+  form: {
+    display: 'flex',
+    flexDirection: 'column'
+  },
+  inputGroup: {
+    marginBottom: '15px'
+  },
+  label: {
+    display: 'block',
+    marginBottom: '5px',
+    color: '#aaa',
+    fontSize: '14px'
+  },
+  input: {
+    width: '100%',
+    padding: '10px',
+    borderRadius: '6px',
+    border: '1px solid #444',
+    background: '#242424',
+    color: '#fff',
+    boxSizing: 'border-box'
+  },
+  button: {
+    background: '#646cff',
+    color: 'white',
+    padding: '12px',
+    border: 'none',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    fontSize: '16px',
+    fontWeight: 'bold',
+    marginTop: '10px',
+    transition: 'background 0.2s'
+  },
+  footer: {
+    marginTop: '20px',
+    textAlign: 'center',
+    color: '#aaa',
+    fontSize: '14px'
+  },
+  link: {
+    color: '#646cff',
+    cursor: 'pointer',
+    textDecoration: 'underline'
+  }
 }
 
 export default App
