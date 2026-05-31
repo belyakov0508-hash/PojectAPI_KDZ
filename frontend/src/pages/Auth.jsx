@@ -1,3 +1,4 @@
+import api from '../api' // Импорт нашего настроенного axios-клиента
 import { useState } from 'react'
 
 export default function Auth() {
@@ -7,37 +8,30 @@ export default function Auth() {
   const [confirmPassword, setConfirmPassword] = useState('')
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    const endpoint = mode === 'login' ? '/login' : '/register'
+  e.preventDefault()
 
-    if (mode === 'register' && password !== confirmPassword) {
-      alert('Пароли не совпадают!')
-      return
+  // Допустим, бэкенд сделал такие эндпоинты в папке api/
+  const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/register'
+
+  try {
+    // Отправляем запрос на эндпоинт бэкенда
+    const response = await api.post(endpoint, {
+      email: email,       // Эти поля должны в точности совпадать
+      password: password  // со схемой Pydantic (schemas/) на бэкенде!
+    })
+
+    alert(response.data.message)
+
+    if (mode === 'login') {
+      window.location.href = '/dispatcher' // уходим на роутинг страниц
     }
-
-    try {
-      const response = await fetch(`http://127.0.0.1:8000${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      })
-      const data = await response.json()
-
-      if (response.ok) {
-        alert(data.message)
-        if (mode === 'register') {
-          setMode('login')
-        } else {
-          // ТУТ БУДЕТ ПЕРЕХОД В СИСТЕМУ ПОСЛЕ ВХОДА
-          window.location.href = '/dispatcher'
-        }
-      } else {
-        alert(data.detail || 'Ошибка')
-      }
-    } catch (error) {
-      alert('Ошибка сети')
+  } catch (error) {
+    if (error.response && error.response.data) {
+      // Выводим ошибку валидации Pydantic или HTTPException из FastAPI
+      alert(error.response.data.detail || 'Ошибка эндпоинта')
     }
   }
+}
 
   return (
     <div style={styles.container}>
