@@ -13,11 +13,11 @@ class Order(Base):
     __tablename__ = "orders"
 
     order_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    product_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    brand: Mapped[str | None] = mapped_column(String(255), nullable=True)
     weight: Mapped[float] = mapped_column(Numeric(4, 2), nullable=False)
     region: Mapped[int] = mapped_column(Integer, nullable=False)
     delivery_hours: Mapped[list[str]] = mapped_column(ARRAY(String(11)), nullable=False)
-    product_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    brand: Mapped[str | None] = mapped_column(String(255), nullable=True)
     status: Mapped[OrderStatus] = mapped_column(
         SAEnum(OrderStatus, name="order_status_enum"),
         nullable=False, default=OrderStatus.pending

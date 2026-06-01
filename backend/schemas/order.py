@@ -20,11 +20,11 @@ class OrderCreate(BaseModel):
 
 class OrderResponse(BaseModel):
     order_id: int
+    product_name: str | None
+    brand: str | None
     weight: float
     region: int
     delivery_hours: list[str]
-    product_name: str | None
-    brand: str | None
     status: OrderStatusEnum
     courier_id: int | None
     assign_time: datetime | None
