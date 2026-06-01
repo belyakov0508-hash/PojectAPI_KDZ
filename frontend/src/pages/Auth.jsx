@@ -9,42 +9,41 @@ export default function Auth() {
   const [error, setError] = useState('')
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
+  e.preventDefault()
+  setError('')
 
-    // Проверка совпадения паролей при регистрации
-    if (mode === 'register' && password !== confirmPassword) {
-      setError('Пароли не совпадают')
-      return
+  if (mode === 'register' && password !== confirmPassword) {
+    setError('Пароли не совпадают')
+    return
+  }
+
+  const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/register'
+
+  try {
+    const response = await api.post(endpoint, {
+      email: email,
+      password: password,
+      ...(mode === 'register' && { role: 'courier' }) // добавляем role при регистрации
+    })
+
+    if (mode === 'login') {
+      // Бэкенд возвращает access_token, а не token
+      localStorage.setItem('token', response.data.access_token)
+      localStorage.setItem('email', email)
+      window.location.href = '/dispatcher'
+    } else {
+      setMode('login')
+      setError('')
+      alert('Аккаунт создан! Теперь войдите.')
     }
-
-    const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/register'
-
-    try {
-      const response = await api.post(endpoint, {
-        email: email,
-        password: password
-      })
-
-      if (mode === 'login') {
-        // Сохраняем токен и email в localStorage
-        localStorage.setItem('token', response.data.token)
-        localStorage.setItem('email', email)
-        window.location.href = '/dispatcher'
-      } else {
-        // После регистрации переключаемся на логин
-        setMode('login')
-        setError('')
-        alert('Аккаунт создан! Теперь войдите.')
-      }
-    } catch (error) {
-      if (error.response && error.response.data) {
-        setError(error.response.data.detail || 'Ошибка эндпоинта')
-      } else {
-        setError('Нет связи с сервером')
-      }
+  } catch (error) {
+    if (error.response && error.response.data) {
+      setError(error.response.data.detail || 'Ошибка эндпоинта')
+    } else {
+      setError('Нет связи с сервером')
     }
   }
+}
 
   return (
     <div style={styles.container}>
