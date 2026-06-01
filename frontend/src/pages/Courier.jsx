@@ -42,6 +42,7 @@ export default function Courier() {
             <div key={order.order_id} style={styles.orderCard}>
               <div>
                 <h3>Заказ №{order.order_id}</h3>
+                <p style={styles.text}><strong>Товар:</strong> {order.brand} {order.product_name}</p>
                 <p style={styles.text}><strong>Регион:</strong> {order.region}</p>
                 <p style={styles.text}><strong>Вес:</strong> {order.weight} кг</p>
                 <p style={styles.text}><strong>Статус:</strong> {order.status}</p>
