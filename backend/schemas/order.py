@@ -13,6 +13,8 @@ class OrderCreate(BaseModel):
     order_id: int
     weight: float
     region: int
+    product_name: str | None = None
+    brand: str | None = None
     delivery_hours: list[str]
 
 
@@ -21,6 +23,8 @@ class OrderResponse(BaseModel):
     weight: float
     region: int
     delivery_hours: list[str]
+    product_name: str | None
+    brand: str | None
     status: OrderStatusEnum
     courier_id: int | None
     assign_time: datetime | None
