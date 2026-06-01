@@ -1,18 +1,24 @@
 import json
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 from backend.core.database import get_db
-from backend.schemas.courier import CourierCreate, CourierResponse
-from backend.crud.courier import get_courier, get_all_couriers, create_courier, update_courier
+from backend.models.courier import Courier
+from backend.schemas.courier import CourierCreate
+from backend.crud.courier import get_courier, create_courier, update_courier
 
 router = APIRouter(prefix="/api/couriers", tags=["Couriers"])
 monitoring_router = APIRouter(prefix="/api/monitoring", tags=["Monitoring"])
 
 
-# Получить всех курьеров
-@monitoring_router.get("/couriers", response_model=list[CourierResponse])
+# Получить всех курьеров с регионами
+@monitoring_router.get("/couriers")
 async def get_all_couriers_endpoint(db: AsyncSession = Depends(get_db)):
-    return await get_all_couriers(db)
+    result = await db.execute(
+        select(Courier).options(selectinload(Courier.regions))
+    )
+    return result.scalars().all()
 
 
 # Загрузка JSON-файла курьеров
@@ -32,7 +38,7 @@ async def upload_couriers(file: UploadFile = File(...), db: AsyncSession = Depen
 
 
 # Получить курьера по ID
-@router.get("/{courier_id}", response_model=CourierResponse)
+@router.get("/{courier_id}")
 async def get_courier_endpoint(courier_id: int, db: AsyncSession = Depends(get_db)):
     courier = await get_courier(db, courier_id)
     if not courier:
@@ -41,7 +47,7 @@ async def get_courier_endpoint(courier_id: int, db: AsyncSession = Depends(get_d
 
 
 # Обновить данные курьера
-@router.patch("/{courier_id}", response_model=CourierResponse)
+@router.patch("/{courier_id}")
 async def update_courier_endpoint(courier_id: int, update_data: dict, db: AsyncSession = Depends(get_db)):
     courier = await update_courier(db, courier_id, update_data)
     if not courier:
@@ -50,6 +56,6 @@ async def update_courier_endpoint(courier_id: int, update_data: dict, db: AsyncS
 
 
 # Создать курьера
-@router.post("/", response_model=CourierResponse)
+@router.post("/")
 async def create_courier_endpoint(data: CourierCreate, db: AsyncSession = Depends(get_db)):
     return await create_courier(db, data)
