@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Integer, String, ARRAY, CheckConstraint, Index
+from sqlalchemy import Integer, String, ARRAY, CheckConstraint, Index, ForeignKey
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from backend.core.database import Base
@@ -30,7 +30,7 @@ class CourierRegion(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     courier_id: Mapped[int] = mapped_column(
-        Integer, nullable=False
+        Integer, ForeignKey("couriers.courier_id"), nullable=False
     )
     region: Mapped[int] = mapped_column(Integer, nullable=False)
 
