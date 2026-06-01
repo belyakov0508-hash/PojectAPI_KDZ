@@ -40,7 +40,7 @@ export default function Dispatcher() {
             style={styles.fileInput}
           />
           <button
-            onClick={(e) => handleUpload(e, '/api/dispatcher/upload-couriers', couriersFile)}
+            onClick={(e) => handleUpload(e, '/api/monitoring/upload-couriers', couriersFile)}
             style={styles.button}
           >
             Загрузить курьеров

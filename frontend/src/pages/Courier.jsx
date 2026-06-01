@@ -9,7 +9,7 @@ export default function Courier() {
 
   const fetchOrders = async () => {
     try {
-      const response = await api.get(`/api/courier/${courierId}/orders`)
+      const response = await api.get(`/api/orders/courier/${courierId}`)
       setOrders(response.data)
     } catch (error) {
       console.error('Ошибка загрузки заказов курьера')
@@ -23,7 +23,7 @@ export default function Courier() {
   const handleDeliver = async (orderId) => {
     try {
       // Бьем по эндпоинту смены статуса заказа
-      await api.post(`/api/orders/${orderId}/deliver`)
+      await api.post(`/api/orders/${orderId}/complete`)
       alert('Статус обновлен: Заказ доставлен!')
       fetchOrders() // Перезагружаем список, чтобы увидеть изменения
     } catch (error) {
