@@ -39,15 +39,16 @@ export default function Courier() {
           <p style={{color: '#aaa'}}>У вас нет активных заказов на доставку.</p>
         ) : (
           orders.map((order) => (
-            <div key={order.id} style={styles.orderCard}>
+            <div key={order.order_id} style={styles.orderCard}>
               <div>
-                <h3>Заказ №{order.id}</h3>
-                <p style={styles.text}><strong>Адрес:</strong> {order.address}</p>
+                <h3>Заказ №{order.order_id}</h3>
+                <p style={styles.text}><strong>Регион:</strong> {order.region}</p>
+                <p style={styles.text}><strong>Вес:</strong> {order.weight} кг</p>
                 <p style={styles.text}><strong>Статус:</strong> {order.status}</p>
               </div>
-              {order.status !== 'delivered' && (
+              {order.status !== 'completed' && (
                 <button
-                  onClick={() => handleDeliver(order.id)}
+                  onClick={() => handleDeliver(order.order_id)}
                   style={styles.deliverButton}
                 >
                   Заказ доставлен
