@@ -1,4 +1,4 @@
-import api from '../api' // Импорт нашего настроенного axios-клиента
+import api from '../api'
 import { useState } from 'react'
 
 export default function Auth() {
@@ -6,32 +6,45 @@ export default function Auth() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [error, setError] = useState('')
 
   const handleSubmit = async (e) => {
-  e.preventDefault()
+    e.preventDefault()
+    setError('')
 
-  // Допустим, бэкенд сделал такие эндпоинты в папке api/
-  const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/register'
-
-  try {
-    // Отправляем запрос на эндпоинт бэкенда
-    const response = await api.post(endpoint, {
-      email: email,       // Эти поля должны в точности совпадать
-      password: password  // со схемой Pydantic (schemas/) на бэкенде!
-    })
-
-    alert(response.data.message)
-
-    if (mode === 'login') {
-      window.location.href = '/dispatcher' // уходим на роутинг страниц
+    // Проверка совпадения паролей при регистрации
+    if (mode === 'register' && password !== confirmPassword) {
+      setError('Пароли не совпадают')
+      return
     }
-  } catch (error) {
-    if (error.response && error.response.data) {
-      // Выводим ошибку валидации Pydantic или HTTPException из FastAPI
-      alert(error.response.data.detail || 'Ошибка эндпоинта')
+
+    const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/register'
+
+    try {
+      const response = await api.post(endpoint, {
+        email: email,
+        password: password
+      })
+
+      if (mode === 'login') {
+        // Сохраняем токен и email в localStorage
+        localStorage.setItem('token', response.data.token)
+        localStorage.setItem('email', email)
+        window.location.href = '/dispatcher'
+      } else {
+        // После регистрации переключаемся на логин
+        setMode('login')
+        setError('')
+        alert('Аккаунт создан! Теперь войдите.')
+      }
+    } catch (error) {
+      if (error.response && error.response.data) {
+        setError(error.response.data.detail || 'Ошибка эндпоинта')
+      } else {
+        setError('Нет связи с сервером')
+      }
     }
   }
-}
 
   return (
     <div style={styles.container}>
@@ -52,13 +65,17 @@ export default function Auth() {
               <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required style={styles.input} />
             </div>
           )}
-          <button type="submit" style={styles.button}>{mode === 'login' ? 'Войти' : 'Создать аккаунт'}</button>
+          {/* Показываем ошибку прямо в форме вместо alert */}
+          {error && <p style={styles.error}>{error}</p>}
+          <button type="submit" style={styles.button}>
+            {mode === 'login' ? 'Войти' : 'Создать аккаунт'}
+          </button>
         </form>
         <div style={styles.footer}>
           {mode === 'login' ? (
-            <p>Нет аккаунта? <span style={styles.link} onClick={() => setMode('register')}>Зарегистрироваться</span></p>
+            <p>Нет аккаунта? <span style={styles.link} onClick={() => { setMode('register'); setError('') }}>Зарегистрироваться</span></p>
           ) : (
-            <p>Уже есть аккаунт? <span style={styles.link} onClick={() => setMode('login')}>Войти</span></p>
+            <p>Уже есть аккаунт? <span style={styles.link} onClick={() => { setMode('login'); setError('') }}>Войти</span></p>
           )}
         </div>
       </div>
@@ -110,6 +127,12 @@ const styles = {
     background: '#242424',
     color: '#fff',
     boxSizing: 'border-box'
+  },
+  error: {
+    color: '#ff4d4d',
+    fontSize: '14px',
+    marginBottom: '10px',
+    textAlign: 'center'
   },
   button: {
     background: '#646cff',
