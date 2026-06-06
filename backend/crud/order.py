@@ -23,8 +23,6 @@ async def get_courier_orders(db: AsyncSession, courier_id: int) -> list[Order]:
 async def create_order(db: AsyncSession, data: OrderCreate) -> Order:
     order = Order(
         order_id=data.order_id,
-        product_name=data.product_name,
-        brand=data.brand,
         weight=data.weight,
         region=data.region,
         delivery_hours=data.delivery_hours,

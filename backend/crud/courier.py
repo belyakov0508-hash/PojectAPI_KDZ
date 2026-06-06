@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from backend.models.courier import Courier, CourierRegion, CourierType
+from backend.models.courier import Courier, CourierRegion
 from backend.schemas.courier import CourierCreate
 
 
@@ -17,7 +17,7 @@ async def get_all_couriers(db: AsyncSession) -> list[Courier]:
 async def create_courier(db: AsyncSession, data: CourierCreate) -> Courier:
     courier = Courier(
         courier_id=data.courier_id,
-        courier_type=CourierType(data.courier_type),
+        courier_type_id=data.courier_type_id,
         working_hours=data.working_hours,
     )
     db.add(courier)

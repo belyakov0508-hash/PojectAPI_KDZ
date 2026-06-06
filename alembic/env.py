@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from alembic import context
 from backend.core.config import settings
 from backend.core.database import Base
-from backend.models import courier, order  # noqa: F401
+from backend.models import Role, CourierTypeTable, User, Courier, CourierRegion, Order  # noqa: F401
 
 config = context.config
 fileConfig(config.config_file_name)
