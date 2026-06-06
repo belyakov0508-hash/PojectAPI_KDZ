@@ -20,16 +20,15 @@ export default function Monitoring() {
 
   useEffect(() => {
     fetchCouriers()
-    // Автообновление каждые 10 секунд
     const interval = setInterval(fetchCouriers, 10000)
     return () => clearInterval(interval)
   }, [])
 
   const typeLabel = {
-  1: '🚶 Пеший',
-  2: '🚲 Велокурьер',
-  3: '🚗 Автокурьер',
-}
+    1: '🚶 Пеший',
+    2: '🚲 Велокурьер',
+    3: '🚗 Автокурьер',
+  }
 
   return (
     <div style={styles.container}>
@@ -50,12 +49,14 @@ export default function Monitoring() {
               <th style={styles.th}>Тип курьера</th>
               <th style={styles.th}>Регионы</th>
               <th style={styles.th}>Рабочие часы</th>
+              <th style={styles.th}>Email</th>
+              <th style={styles.th}>Пароль</th>
             </tr>
           </thead>
           <tbody>
             {couriers.length === 0 ? (
               <tr>
-                <td colSpan="4" style={styles.empty}>Курьеры не найдены</td>
+                <td colSpan="6" style={styles.empty}>Курьеры не найдены</td>
               </tr>
             ) : (
               couriers.map((courier) => (
@@ -73,6 +74,10 @@ export default function Monitoring() {
                   </td>
                   <td style={styles.td}>
                     {courier.working_hours && courier.working_hours.join(', ')}
+                  </td>
+                  <td style={styles.td}>{courier.email || '—'}</td>
+                  <td style={styles.td}>
+                    <span style={styles.password}>{courier.password || '—'}</span>
                   </td>
                 </tr>
               ))
@@ -103,5 +108,10 @@ const styles = {
   typeBadge: {
     background: '#2a2a4a', color: '#aab4ff',
     padding: '4px 10px', borderRadius: '4px', fontSize: '13px'
+  },
+  password: {
+    background: '#2a2a2a', color: '#aaa',
+    padding: '4px 10px', borderRadius: '4px', fontSize: '13px',
+    fontFamily: 'monospace'
   }
 }
