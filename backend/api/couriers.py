@@ -71,6 +71,7 @@ async def get_available_orders_endpoint(
 @monitoring_router.get("/available-couriers")
 async def get_available_couriers_endpoint(
     weight: float = Query(..., gt=0, description="Вес заказа в кг"),
+    region: int = Query(..., description="Регион заказа"),
     db: AsyncSession = Depends(get_db),
     _: dict = Depends(require_dispatcher),
 ):
@@ -89,7 +90,8 @@ async def get_available_couriers_endpoint(
         .filter(Courier.courier_type_id.in_(suitable_type_ids))
         .options(selectinload(Courier.regions))
     )
-    couriers = result.scalars().all()
+    couriers_all = result.scalars().all()
+    couriers = [c for c in couriers_all if region in [r.region for r in c.regions]]
 
     response = []
     for courier in couriers:
