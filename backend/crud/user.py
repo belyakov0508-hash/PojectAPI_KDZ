@@ -8,11 +8,12 @@ async def get_user_by_email(db: AsyncSession, email: str) -> User | None:
     return result.scalar_one_or_none()
 
 
-async def create_user(db: AsyncSession, email: str, password: str, role_id: int = 1) -> User:
+async def create_user(db: AsyncSession, email: str, password: str, role_id: int = 1, courier_id: int | None = None) -> User:
     user = User(
         email=email,
         hashed_password=password,
         role_id=role_id,
+        courier_id=courier_id,
     )
     db.add(user)
     await db.commit()

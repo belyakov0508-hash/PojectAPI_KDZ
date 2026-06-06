@@ -5,6 +5,7 @@ class UserRegister(BaseModel):
     email: str
     password: str
     role_id: int = 1  # 1 = courier, 2 = dispatcher
+    courier_id: int | None = None
 
 
 class UserLogin(BaseModel):
