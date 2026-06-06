@@ -1,34 +1,53 @@
-import axios from 'axios'
+const BASE_URL = import.meta.env.VITE_API_URL
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-})
-
-// Перехватчик запросов — автоматически добавляет токен в каждый запрос
-api.interceptors.request.use(
-  (config) => {
+const api = {
+  async request(method, url, data = null, extraHeaders = {}) {
     const token = localStorage.getItem('token')
-    if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`
-    }
-    return config
-  },
-  (error) => Promise.reject(error)
-)
 
-// Перехватчик ответов — если токен протух (401), чистим сессию и отправляем на логин
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
+    const headers = {
+      ...extraHeaders,
+    }
+
+    if (!(data instanceof FormData)) {
+      headers['Content-Type'] = 'application/json'
+    }
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
+
+    const response = await fetch(`${BASE_URL}${url}`, {
+      method,
+      headers,
+      body: data instanceof FormData ? data : data ? JSON.stringify(data) : null,
+    })
+
+    // Обработка 401
+    if (response.status === 401) {
       localStorage.removeItem('token')
       window.location.href = '/'
+      return
     }
-    return Promise.reject(error)
-  }
-)
+
+    if (!response.ok) {
+      const error = new Error('HTTP error')
+      error.response = {
+        status: response.status,
+        data: await response.json().catch(() => ({})),
+      }
+      throw error
+    }
+
+    return { data: await response.json() }
+  },
+
+  get(url) {
+    return this.request('GET', url)
+  },
+
+  post(url, data, options = {}) {
+    return this.request('POST', url, data)
+  },
+}
 
 export default api

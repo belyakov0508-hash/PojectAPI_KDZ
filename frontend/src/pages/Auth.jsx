@@ -51,7 +51,7 @@ export default function Auth() {
         <h2 style={styles.title}>{mode === 'login' ? 'Войти в аккаунт' : 'Регистрация'}</h2>
         <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.inputGroup}>
-            <label style={styles.label}>Email / Логин</label>
+            <label style={styles.label}>Email</label>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required style={styles.input} />
           </div>
           <div style={styles.inputGroup}>
