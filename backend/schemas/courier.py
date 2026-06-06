@@ -6,6 +6,8 @@ class CourierCreate(BaseModel):
     courier_type_id: int  # 1 = foot, 2 = bike, 3 = car
     working_hours: list[str]
     regions: list[int]
+    email: str
+    password: str
 
 
 class CourierResponse(BaseModel):

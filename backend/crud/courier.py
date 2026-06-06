@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from backend.models.courier import Courier, CourierRegion
 from backend.schemas.courier import CourierCreate
+from backend.crud.user import create_user
 
 
 async def get_courier(db: AsyncSession, courier_id: int) -> Courier | None:
@@ -24,6 +25,9 @@ async def create_courier(db: AsyncSession, data: CourierCreate) -> Courier:
 
     for region in data.regions:
         db.add(CourierRegion(courier_id=data.courier_id, region=region))
+
+    # Создаём пользователя для курьера автоматически
+    await create_user(db, data.email, data.password, role_id=1, courier_id=data.courier_id)
 
     await db.commit()
     await db.refresh(courier)
