@@ -5,8 +5,7 @@ export default function Dispatcher() {
   const [couriersFile, setCouriersFile] = useState(null)
   const [ordersFile, setOrdersFile] = useState(null)
 
-  // Раздельные состояния для статуса каждой карточки
-  const [couriersStatus, setCouriersStatus] = useState(null) // { type: 'success'|'error', message: '' }
+  const [couriersStatus, setCouriersStatus] = useState(null)
   const [ordersStatus, setOrdersStatus] = useState(null)
 
   const [couriersLoading, setCouriersLoading] = useState(false)
@@ -18,7 +17,6 @@ export default function Dispatcher() {
       return
     }
 
-    // Проверка формата файла на клиенте
     if (!file.name.endsWith('.json')) {
       setStatus({ type: 'error', message: 'Файл должен быть в формате .json' })
       return
@@ -38,10 +36,8 @@ export default function Dispatcher() {
       const status = error.response?.status
 
       if (status === 400) {
-        // Ошибка валидации — показываем конкретное сообщение от бэкенда
         const detail = error.response.data?.detail
         if (Array.isArray(detail)) {
-          // Pydantic возвращает массив ошибок — собираем их в список
           const messages = detail.map(d => `• ${d.loc?.join(' → ')}: ${d.msg}`).join('\n')
           setStatus({ type: 'error', message: `Ошибка валидации:\n${messages}` })
         } else {
@@ -70,7 +66,15 @@ export default function Dispatcher() {
         {/* Карточка курьеров */}
         <div style={styles.card}>
           <h3 style={styles.cardTitle}>Загрузка JSON курьеров</h3>
-          <p style={styles.hint}>Ожидаемые поля: courier_id, courier_type, working_hours, regions</p>
+          <p style={styles.hint}>Ожидаемые поля:</p>
+          <ul style={styles.hintList}>
+            <li>courier_id — ID курьера</li>
+            <li>courier_type_id — тип (1=пеший, 2=велосипед, 3=авто)</li>
+            <li>working_hours — часы работы, например ["09:00-18:00"]</li>
+            <li>regions — список регионов, например [1, 2]</li>
+            <li>email — почта для входа курьера</li>
+            <li>password — пароль для входа курьера</li>
+          </ul>
           <input
             type="file"
             accept=".json"
@@ -95,7 +99,13 @@ export default function Dispatcher() {
         {/* Карточка заказов */}
         <div style={styles.card}>
           <h3 style={styles.cardTitle}>Загрузка JSON заказов</h3>
-          <p style={styles.hint}>Ожидаемые поля: order_id, weight, region, delivery_hours</p>
+          <p style={styles.hint}>Ожидаемые поля:</p>
+          <ul style={styles.hintList}>
+            <li>order_id — ID заказа</li>
+            <li>weight — вес (от 0.01 до 50.00 кг)</li>
+            <li>region — регион доставки</li>
+            <li>delivery_hours — часы доставки, например ["10:00-14:00"]</li>
+          </ul>
           <input
             type="file"
             accept=".json"
@@ -128,7 +138,8 @@ const styles = {
   cardContainer: { display: 'flex', gap: '20px', flexWrap: 'wrap' },
   card: { background: '#1a1a1a', padding: '25px', borderRadius: '8px', border: '1px solid #333', width: '320px' },
   cardTitle: { marginTop: 0, marginBottom: '8px' },
-  hint: { color: '#666', fontSize: '12px', marginBottom: '15px', marginTop: 0 },
+  hint: { color: '#666', fontSize: '12px', marginBottom: '4px', marginTop: 0 },
+  hintList: { color: '#666', fontSize: '12px', marginTop: 0, marginBottom: '15px', paddingLeft: '18px', lineHeight: '1.8' },
   fileInput: { display: 'block', marginBottom: '10px', color: '#ccc' },
   fileName: { color: '#aaa', fontSize: '13px', marginBottom: '10px' },
   statusBox: { padding: '10px', borderRadius: '6px', fontSize: '13px', marginBottom: '12px', whiteSpace: 'pre-line' },
