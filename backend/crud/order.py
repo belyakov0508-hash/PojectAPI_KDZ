@@ -12,12 +12,12 @@ async def get_order(db: AsyncSession, order_id: int) -> Order | None:
 
 async def get_all_orders(db: AsyncSession) -> list[Order]:
     result = await db.execute(select(Order))
-    return result.scalars().all()
+    return list(result.scalars().all())
 
 
 async def get_courier_orders(db: AsyncSession, courier_id: int) -> list[Order]:
     result = await db.execute(select(Order).filter(Order.courier_id == courier_id))
-    return result.scalars().all()
+    return list(result.scalars().all())
 
 
 async def create_order(db: AsyncSession, data: OrderCreate) -> Order:
@@ -38,6 +38,9 @@ async def assign_courier(db: AsyncSession, order_id: int, courier_id: int) -> Or
     order = await get_order(db, order_id)
     if not order:
         return None
+
+    if order.status != OrderStatus.pending:
+        raise ValueError(f"Заказ уже имеет статус '{OrderStatus(order.status).value}'")
 
     order.courier_id = courier_id
     order.status = OrderStatus.assigned
