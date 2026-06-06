@@ -129,7 +129,7 @@ export default function CourierOrders() {
           <div style={s.panelHeader}>
             <span style={s.panelTitle}>
               {selectedOrder
-                ? 'Курьеры для заказа #${selectedOrder.order_id} (${selectedOrder.weight} кг)'
+                ? `Курьеры для заказа #${selectedOrder.order_id} (${selectedOrder.weight} кг)`
                 : 'Выберите заказ'}
             </span>
             {couriers.length > 0 && <span style={s.badge}>{couriers.length}</span>}
@@ -175,7 +175,7 @@ export default function CourierOrders() {
                       </td>
                       <td style={s.td}>
                         {courier.earnings !== null
-                          ? <span style={s.earnings}>{courier.earnings.toLocaleString()} ₸</span>
+                          ? <span style={s.earnings}>{courier.earnings.toLocaleString()} ₽</span>
                           : <span style={s.noData}>—</span>}
                       </td>
                     </tr>

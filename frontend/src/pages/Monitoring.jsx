@@ -88,7 +88,7 @@ export default function Monitoring() {
                   </td>
                   <td style={styles.td}>
                     {courier.earnings !== null && courier.earnings !== undefined
-                      ? <span style={styles.earnings}>{courier.earnings.toLocaleString()} ₸</span>
+                      ? <span style={styles.earnings}>{courier.earnings.toLocaleString()} ₽</span>
                       : <span style={styles.noData}>—</span>}
                   </td>
                 </tr>
