@@ -22,5 +22,5 @@ async def login(data: UserLogin, db: AsyncSession = Depends(get_db)):
     user = await get_user_by_email(db, data.email)
     if not user or user.hashed_password != data.password:
         raise HTTPException(status_code=401, detail="Неверный email или пароль")
-    token = create_access_token({"sub": user.email, "role": user.role_id})
+    token = create_access_token({"sub": user.email, "role": user.role_id, "courier_id": user.courier_id})
     return {"access_token": token, "token_type": "bearer"}

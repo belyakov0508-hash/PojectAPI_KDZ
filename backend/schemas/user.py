@@ -16,6 +16,7 @@ class UserResponse(BaseModel):
     id: int
     email: str
     role_id: int
+    courier_id: int | None = None
 
     model_config = {"from_attributes": True}
 
