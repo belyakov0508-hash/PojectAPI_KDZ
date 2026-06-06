@@ -27,13 +27,14 @@ async def get_all_couriers_endpoint(
     )
     rows = result.all()
     couriers = []
-    for courier, email in rows:
+    for courier, email, password in rows:
         couriers.append({
             "courier_id": courier.courier_id,
             "courier_type_id": courier.courier_type_id,
             "working_hours": courier.working_hours,
             "regions": courier.regions,
             "email": email,
+            "password": password,
         })
     return couriers
 
