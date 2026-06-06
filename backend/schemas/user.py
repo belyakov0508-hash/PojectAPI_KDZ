@@ -1,10 +1,10 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
 
 class UserRegister(BaseModel):
     email: str
     password: str
-    role: str = "courier"
+    role_id: int = 1  # 1 = courier, 2 = dispatcher
 
 
 class UserLogin(BaseModel):
@@ -15,7 +15,7 @@ class UserLogin(BaseModel):
 class UserResponse(BaseModel):
     id: int
     email: str
-    role: str
+    role_id: int
 
     model_config = {"from_attributes": True}
 
