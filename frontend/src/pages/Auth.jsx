@@ -6,7 +6,7 @@ export default function Auth() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [roleId, setRoleId] = useState(1) // 1 = courier, 2 = dispatcher
+  const [roleId, setRoleId] = useState(1)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -31,15 +31,12 @@ export default function Auth() {
 
       if (mode === 'login') {
         const token = response.data.access_token
-
-        // Достаём роль из JWT payload (средняя часть токена)
         const decoded = JSON.parse(atob(token.split('.')[1]))
 
         localStorage.setItem('token', token)
         localStorage.setItem('email', email)
         localStorage.setItem('role', decoded.role)
 
-        // Редирект в зависимости от роли
         window.location.href = decoded.role === 2 ? '/dispatcher' : '/courier'
       } else {
         setMode('login')
