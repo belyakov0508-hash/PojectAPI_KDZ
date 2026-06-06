@@ -14,5 +14,7 @@ class CourierResponse(BaseModel):
     courier_id: int
     courier_type_id: int
     working_hours: list[str]
+    email: str | None = None
+    password: str | None = None
 
     model_config = {"from_attributes": True}
