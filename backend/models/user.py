@@ -12,5 +12,6 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
     role_id: Mapped[int] = mapped_column(Integer, ForeignKey("roles.id", ondelete="RESTRICT"), nullable=False)
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    courier_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("couriers.courier_id", ondelete="SET NULL"), nullable=True)
 
     role_ref = relationship("Role", back_populates="users")
