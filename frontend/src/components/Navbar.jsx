@@ -16,6 +16,7 @@ export default function Navbar() {
         <>
           <Link to="/dispatcher" style={styles.link}>Загрузка данных</Link>
           <Link to="/monitoring" style={styles.link}>Мониторинг курьеров</Link>
+          <Link to="/courier-orders" style={styles.link}>Заказы курьеров</Link>
         </>
       )}
       {role === 1 && (
@@ -51,3 +52,4 @@ const styles = {
     fontSize: '14px',
   },
 }
+`

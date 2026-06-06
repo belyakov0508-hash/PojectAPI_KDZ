@@ -4,9 +4,9 @@ import Auth from './pages/Auth'
 import Dispatcher from './pages/Dispatcher'
 import Monitoring from './pages/Monitoring'
 import Courier from './pages/Courier'
+import CourierOrders from './pages/CourierOrders'
 import './App.css'
 
-// Защищённый маршрут — проверяет токен и роль
 function PrivateRoute({ element, allowedRole }) {
   const token = localStorage.getItem('token')
   const role = parseInt(localStorage.getItem('role'))
@@ -31,6 +31,7 @@ function Layout() {
         {/* Только для диспетчера (role_id = 2) */}
         <Route path="/dispatcher" element={<PrivateRoute element={<Dispatcher />} allowedRole={2} />} />
         <Route path="/monitoring" element={<PrivateRoute element={<Monitoring />} allowedRole={2} />} />
+        <Route path="/courier-orders" element={<PrivateRoute element={<CourierOrders />} allowedRole={2} />} />
 
         {/* Только для курьера (role_id = 1) */}
         <Route path="/courier" element={<PrivateRoute element={<Courier />} allowedRole={1} />} />
