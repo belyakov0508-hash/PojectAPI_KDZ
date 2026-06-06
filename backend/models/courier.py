@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, String, ARRAY, CheckConstraint, Index, ForeignKey
+from sqlalchemy import Integer, String, ARRAY, CheckConstraint, Index, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from backend.core.database import Base
 
@@ -30,5 +30,6 @@ class CourierRegion(Base):
 
     __table_args__ = (
         CheckConstraint("region > 0", name="check_region_positive"),
+        UniqueConstraint("courier_id", "region", name="unique_courier_region"),  # ← добавить
         Index("idx_courier_regions_search", "courier_id", "region"),
     )
