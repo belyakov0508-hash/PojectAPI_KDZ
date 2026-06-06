@@ -38,7 +38,7 @@ export default function CourierOrders() {
     setError('')
     try {
       setLoadingCouriers(true)
-      const res = await api.get(`/api/monitoring/available-couriers?weight=${order.weight}`)
+      const res = await api.get(`/api/monitoring/available-couriers?weight=${order.weight}&region=${order.region}`)
       setCouriers(res.data)
     } catch {
       setError('Не удалось загрузить курьеров')
