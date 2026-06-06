@@ -3,16 +3,23 @@ import api from '../api'
 
 export default function Courier() {
   const [orders, setOrders] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
-  // Для простоты жестко зашьем ID курьера = 1 (в реальном приложении он берется после логина)
-  const courierId = 1
+  // Достаём courier_id из JWT токена
+  const token = localStorage.getItem('token')
+  const decoded = JSON.parse(atob(token.split('.')[1]))
+  const courierId = decoded.courier_id
 
   const fetchOrders = async () => {
     try {
+      setLoading(true)
       const response = await api.get(`/api/orders/courier/${courierId}`)
       setOrders(response.data)
-    } catch (error) {
-      console.error('Ошибка загрузки заказов курьера')
+    } catch (err) {
+      setError('Ошибка загрузки заказов')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -22,30 +29,39 @@ export default function Courier() {
 
   const handleDeliver = async (orderId) => {
     try {
-      // Бьем по эндпоинту смены статуса заказа
       await api.post(`/api/orders/${orderId}/complete`)
-      alert('Статус обновлен: Заказ доставлен!')
-      fetchOrders() // Перезагружаем список, чтобы увидеть изменения
-    } catch (error) {
-      alert('Не удалось обновить статус заказа')
+      fetchOrders()
+    } catch (err) {
+      setError('Не удалось обновить статус заказа')
     }
+  }
+
+  const statusLabel = {
+    pending: '🕐 Ожидает',
+    assigned: '🚴 В доставке',
+    completed: '✅ Доставлен',
   }
 
   return (
     <div style={styles.container}>
       <h1 style={styles.title}>Мои заказы (Курьер #{courierId})</h1>
-      <div style={styles.list}>
-        {orders.length === 0 ? (
-          <p style={{color: '#aaa'}}>У вас нет активных заказов на доставку.</p>
-        ) : (
-          orders.map((order) => (
+
+      {error && <p style={styles.error}>{error}</p>}
+
+      {loading ? (
+        <p style={styles.hint}>Загрузка...</p>
+      ) : orders.length === 0 ? (
+        <p style={styles.hint}>У вас нет активных заказов.</p>
+      ) : (
+        <div style={styles.list}>
+          {orders.map((order) => (
             <div key={order.order_id} style={styles.orderCard}>
               <div>
-                <h3>Заказ №{order.order_id}</h3>
-                <p style={styles.text}><strong>Товар:</strong> {order.brand} {order.product_name}</p>
+                <h3 style={styles.orderTitle}>Заказ №{order.order_id}</h3>
                 <p style={styles.text}><strong>Регион:</strong> {order.region}</p>
                 <p style={styles.text}><strong>Вес:</strong> {order.weight} кг</p>
-                <p style={styles.text}><strong>Статус:</strong> {order.status}</p>
+                <p style={styles.text}><strong>Часы доставки:</strong> {order.delivery_hours.join(', ')}</p>
+                <p style={styles.text}><strong>Статус:</strong> {statusLabel[order.status] || order.status}</p>
               </div>
               {order.status !== 'completed' && (
                 <button
@@ -56,18 +72,58 @@ export default function Courier() {
                 </button>
               )}
             </div>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
 
 const styles = {
-  container: { padding: '40px', fontFamily: 'Arial, sans-serif', color: '#fff' },
-  title: { marginBottom: '30px' },
-  list: { display: 'flex', flexDirection: 'column', gap: '15px' },
-  orderCard: { background: '#1a1a1a', border: '1px solid #333', padding: '20px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  text: { margin: '5px 0', color: '#ccc' },
-  deliverButton: { background: '#2e7d32', color: 'white', border: 'none', padding: '10px 15px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }
+  container: {
+    padding: '40px',
+    fontFamily: 'Arial, sans-serif',
+    color: '#fff',
+  },
+  title: {
+    marginBottom: '30px',
+  },
+  hint: {
+    color: '#aaa',
+  },
+  error: {
+    color: '#ff4d4d',
+    marginBottom: '15px',
+  },
+  list: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '15px',
+  },
+  orderCard: {
+    background: '#1a1a1a',
+    border: '1px solid #333',
+    padding: '20px',
+    borderRadius: '8px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  orderTitle: {
+    margin: '0 0 10px 0',
+  },
+  text: {
+    margin: '5px 0',
+    color: '#ccc',
+  },
+  deliverButton: {
+    background: '#2e7d32',
+    color: 'white',
+    border: 'none',
+    padding: '10px 15px',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    fontWeight: 'bold',
+    whiteSpace: 'nowrap',
+  },
 }
