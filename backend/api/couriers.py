@@ -21,7 +21,7 @@ async def get_all_couriers_endpoint(
     _: dict = Depends(require_dispatcher),
 ):
     result = await db.execute(
-        select(Courier, User.email)
+        select(Courier, User.email, User.hashed_password)
         .join(User, User.courier_id == Courier.courier_id, isouter=True)
         .options(selectinload(Courier.regions))
     )
