@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.core.database import engine, Base
-from backend.models import courier, order, user  # noqa: F401
+from backend.models import Role, CourierTypeTable, User, Courier, CourierRegion, Order  # noqa: F401
 from backend.api import couriers_router, monitoring_router, orders_router, dispatcher_router, auth_router
 
 
