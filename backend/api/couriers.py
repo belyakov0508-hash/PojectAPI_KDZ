@@ -5,6 +5,7 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from backend.core.database import get_db
 from backend.models.courier import Courier
+from backend.models.user import User
 from backend.schemas.courier import CourierCreate
 from backend.crud.courier import get_courier, create_courier, update_courier
 
@@ -16,9 +17,22 @@ monitoring_router = APIRouter(prefix="/api/monitoring", tags=["Monitoring"])
 @monitoring_router.get("/couriers")
 async def get_all_couriers_endpoint(db: AsyncSession = Depends(get_db)):
     result = await db.execute(
-        select(Courier).options(selectinload(Courier.regions))
+        select(Courier, User.email, User.hashed_password)
+        .join(User, User.courier_id == Courier.courier_id, isouter=True)
+        .options(selectinload(Courier.regions))
     )
-    return result.scalars().all()
+    rows = result.all()
+    couriers = []
+    for courier, email, password in rows:
+        couriers.append({
+            "courier_id": courier.courier_id,
+            "courier_type_id": courier.courier_type_id,
+            "working_hours": courier.working_hours,
+            "regions": courier.regions,
+            "email": email,
+            "password": password,
+        })
+    return couriers
 
 
 # Загрузка JSON-файла курьеров
