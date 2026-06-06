@@ -26,10 +26,10 @@ export default function Monitoring() {
   }, [])
 
   const typeLabel = {
-    foot: '🚶 Пеший',
-    bike: '🚲 Велокурьер',
-    car:  '🚗 Автокурьер',
-  }
+  1: '🚶 Пеший',
+  2: '🚲 Велокурьер',
+  3: '🚗 Автокурьер',
+}
 
   return (
     <div style={styles.container}>
@@ -63,7 +63,7 @@ export default function Monitoring() {
                   <td style={styles.td}>#{courier.courier_id}</td>
                   <td style={styles.td}>
                     <span style={styles.typeBadge}>
-                      {typeLabel[courier.courier_type] || courier.courier_type}
+                      {typeLabel[courier.courier_type_id] || courier.courier_type_id}
                     </span>
                   </td>
                   <td style={styles.td}>
