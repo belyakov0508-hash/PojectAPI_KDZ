@@ -51,12 +51,14 @@ export default function Monitoring() {
               <th style={styles.th}>Рабочие часы</th>
               <th style={styles.th}>Email</th>
               <th style={styles.th}>Пароль</th>
+              <th style={styles.th}>Рейтинг</th>
+              <th style={styles.th}>Зарплата</th>
             </tr>
           </thead>
           <tbody>
             {couriers.length === 0 ? (
               <tr>
-                <td colSpan="6" style={styles.empty}>Курьеры не найдены</td>
+                <td colSpan="8" style={styles.empty}>Курьеры не найдены</td>
               </tr>
             ) : (
               couriers.map((courier) => (
@@ -79,6 +81,16 @@ export default function Monitoring() {
                   <td style={styles.td}>
                     <span style={styles.password}>{courier.password || '—'}</span>
                   </td>
+                  <td style={styles.td}>
+                    {courier.rating !== null && courier.rating !== undefined
+                      ? <span style={styles.rating}>★ {courier.rating}</span>
+                      : <span style={styles.noData}>—</span>}
+                  </td>
+                  <td style={styles.td}>
+                    {courier.earnings !== null && courier.earnings !== undefined
+                      ? <span style={styles.earnings}>{courier.earnings.toLocaleString()} ₸</span>
+                      : <span style={styles.noData}>—</span>}
+                  </td>
                 </tr>
               ))
             )}
@@ -88,7 +100,6 @@ export default function Monitoring() {
     </div>
   )
 }
-
 const styles = {
   container: { padding: '40px', fontFamily: 'Arial, sans-serif', color: '#fff' },
   header: { display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '30px' },
@@ -113,5 +124,8 @@ const styles = {
     background: '#2a2a2a', color: '#aaa',
     padding: '4px 10px', borderRadius: '4px', fontSize: '13px',
     fontFamily: 'monospace'
-  }
+  },
+  rating: { color: '#fbbf24', fontSize: '13px' },
+  earnings: { color: '#86efac', fontSize: '13px' },
+  noData: { color: '#444', fontSize: '13px' },
 }
