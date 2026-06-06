@@ -14,7 +14,7 @@ export default function Courier() {
   const fetchOrders = async () => {
     try {
       setLoading(true)
-      const response = await api.get(`/api/orders/courier/${courierId}`)
+      const response = await api.get('/api/orders/my')
       setOrders(response.data)
     } catch (err) {
       setError('Ошибка загрузки заказов')
