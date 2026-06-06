@@ -1,8 +1,16 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy import func
 from backend.models.courier import Courier, CourierRegion
+from backend.models.order import Order, OrderStatus
 from backend.schemas.courier import CourierCreate
-from backend.crud.user import add_user  # ← было create_user
+from backend.crud.user import add_user
+
+COURIER_TYPE_COEFFICIENT = {
+    1: 2,  # foot
+    2: 5,  # bike
+    3: 9,  # car
+}
 
 
 async def get_courier(db: AsyncSession, courier_id: int) -> Courier | None:
@@ -12,7 +20,7 @@ async def get_courier(db: AsyncSession, courier_id: int) -> Courier | None:
 
 async def get_all_couriers(db: AsyncSession) -> list[Courier]:
     result = await db.execute(select(Courier))
-    return result.scalars().all()
+    return list(result.scalars().all())
 
 
 async def create_courier(db: AsyncSession, data: CourierCreate) -> Courier:
@@ -45,3 +53,48 @@ async def update_courier(db: AsyncSession, courier_id: int, update_data: dict) -
     await db.commit()
     await db.refresh(courier)
     return courier
+
+
+async def get_courier_rating(db: AsyncSession, courier_id: int) -> float | None:
+    result = await db.execute(
+        select(
+            func.avg(
+                func.extract("epoch", Order.complete_time) -
+                func.extract("epoch", Order.assign_time)
+            )
+        )
+        .filter(
+            Order.courier_id == courier_id,
+            Order.status == OrderStatus.completed,
+            Order.complete_time.isnot(None),
+            Order.assign_time.isnot(None),
+        )
+        .group_by(Order.region)
+    )
+    averages = result.scalars().all()
+
+    if not averages:
+        return None
+
+    t = min(averages)
+    rating = (3600 - min(t, 3600)) / 3600 * 5
+    return round(rating, 2)
+
+
+async def get_courier_earnings(db: AsyncSession, courier_id: int) -> int | None:
+    courier = await get_courier(db, courier_id)
+    if not courier:
+        return None
+
+    coefficient = COURIER_TYPE_COEFFICIENT.get(courier.courier_type_id, 1)
+
+    result = await db.execute(
+        select(func.count(Order.order_id))
+        .filter(
+            Order.courier_id == courier_id,
+            Order.status == OrderStatus.completed,
+        )
+    )
+    completed_count = result.scalar() or 0
+
+    return 500 * coefficient * completed_count

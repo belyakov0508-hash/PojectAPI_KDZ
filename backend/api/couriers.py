@@ -8,7 +8,7 @@ from backend.core.security import require_dispatcher
 from backend.models.courier import Courier
 from backend.models.user import User
 from backend.schemas.courier import CourierCreate
-from backend.crud.courier import get_courier, create_courier, update_courier
+from backend.crud.courier import get_courier, create_courier, update_courier, get_courier_rating, get_courier_earnings
 
 router = APIRouter(prefix="/api/couriers", tags=["Couriers"])
 monitoring_router = APIRouter(prefix="/api/monitoring", tags=["Monitoring"])
@@ -48,15 +48,34 @@ async def upload_couriers(
 ):
     if not file.filename or not file.filename.endswith('.json'):
         raise HTTPException(status_code=400, detail="Файл должен быть в формате JSON")
+
     try:
         contents = await file.read()
         data = json.loads(contents)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Ошибка чтения файла: {str(e)}")
+
+    # Проверяем какие ID уже существуют в БД
+    invalid_ids = []
+    for item in data:
+        existing = await get_courier(db, item.get("courier_id"))
+        if existing:
+            invalid_ids.append(item.get("courier_id"))
+
+    if invalid_ids:
+        raise HTTPException(
+            status_code=400,
+            detail={"message": "Курьеры с такими ID уже существуют", "invalid_ids": invalid_ids}
+        )
+
+    try:
         for item in data:
             courier_data = CourierCreate(**item)
             await create_courier(db, courier_data)
-        return {"message": f"Успешно импортировано курьеров: {len(data)}"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка обработки файла: {str(e)}")
+
+    return {"message": f"Успешно импортировано курьеров: {len(data)}"}
 
 
 # Получить курьера по ID — только диспетчер
@@ -70,6 +89,34 @@ async def get_courier_endpoint(
     if not courier:
         raise HTTPException(status_code=404, detail="Курьер не найден")
     return courier
+
+
+# Получить рейтинг курьера — только диспетчер
+@router.get("/{courier_id}/rating")
+async def get_courier_rating_endpoint(
+    courier_id: int,
+    db: AsyncSession = Depends(get_db),
+    _: dict = Depends(require_dispatcher),
+):
+    courier = await get_courier(db, courier_id)
+    if not courier:
+        raise HTTPException(status_code=404, detail="Курьер не найден")
+    rating = await get_courier_rating(db, courier_id)
+    return {"courier_id": courier_id, "rating": rating}
+
+
+# Получить заработок курьера — только диспетчер
+@router.get("/{courier_id}/earnings")
+async def get_courier_earnings_endpoint(
+    courier_id: int,
+    db: AsyncSession = Depends(get_db),
+    _: dict = Depends(require_dispatcher),
+):
+    courier = await get_courier(db, courier_id)
+    if not courier:
+        raise HTTPException(status_code=404, detail="Курьер не найден")
+    earnings = await get_courier_earnings(db, courier_id)
+    return {"courier_id": courier_id, "earnings": earnings}
 
 
 # Обновить данные курьера — только диспетчер

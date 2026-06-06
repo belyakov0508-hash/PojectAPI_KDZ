@@ -6,7 +6,7 @@ from backend.core.security import require_dispatcher, require_courier
 from backend.schemas.order import OrderCreate, OrderResponse
 from backend.crud.order import (
     get_all_orders, get_courier_orders,
-    create_order, assign_courier, complete_order
+    create_order, assign_courier, complete_order, get_order
 )
 
 router = APIRouter(prefix="/api/orders", tags=["Orders"])
@@ -22,15 +22,34 @@ async def upload_orders(
 ):
     if not file.filename or not file.filename.endswith('.json'):
         raise HTTPException(status_code=400, detail="Файл должен быть в формате JSON")
+
     try:
         contents = await file.read()
         data = json.loads(contents)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Ошибка чтения файла: {str(e)}")
+
+    # Проверяем какие ID уже существуют в БД
+    invalid_ids = []
+    for item in data:
+        existing = await get_order(db, item.get("order_id"))
+        if existing:
+            invalid_ids.append(item.get("order_id"))
+
+    if invalid_ids:
+        raise HTTPException(
+            status_code=400,
+            detail={"message": "Заказы с такими ID уже существуют", "invalid_ids": invalid_ids}
+        )
+
+    try:
         for item in data:
             order_data = OrderCreate(**item)
             await create_order(db, order_data)
-        return {"message": f"Успешно импортировано заказов: {len(data)}"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка обработки файла: {str(e)}")
+
+    return {"message": f"Успешно импортировано заказов: {len(data)}"}
 
 
 # Получить все заказы — только диспетчер
@@ -95,7 +114,10 @@ async def complete_order_endpoint(
     db: AsyncSession = Depends(get_db),
     _: dict = Depends(require_courier),
 ):
-    order = await complete_order(db, order_id)
+    try:
+        order = await complete_order(db, order_id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     if not order:
         raise HTTPException(status_code=404, detail="Заказ не найден")
     return order
