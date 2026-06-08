@@ -37,7 +37,7 @@ npm install
 ```
 
 2. Создать файл `frontend/.env`: VITE_API_URL=http://localhost:8000
-3. 3. Запустить:
+3. Запустить:
 ```bash
 npm run dev
 ```
