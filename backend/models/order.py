@@ -1,30 +1,25 @@
 import enum
-from sqlalchemy import Integer, String, Numeric, ForeignKey, ARRAY, TIMESTAMP, CheckConstraint, Index
+from sqlalchemy import Integer, Numeric, ForeignKey, ARRAY, String, TIMESTAMP, CheckConstraint, Index
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from backend.core.database import Base
+
 
 class OrderStatus(enum.Enum):
     pending   = "pending"
     assigned  = "assigned"
     completed = "completed"
 
+
 class Order(Base):
     __tablename__ = "orders"
 
     order_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    product_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    brand: Mapped[str | None] = mapped_column(String(255), nullable=True)
     weight: Mapped[float] = mapped_column(Numeric(4, 2), nullable=False)
     region: Mapped[int] = mapped_column(Integer, nullable=False)
     delivery_hours: Mapped[list[str]] = mapped_column(ARRAY(String(11)), nullable=False)
-    status: Mapped[OrderStatus] = mapped_column(
-        SAEnum(OrderStatus, name="order_status_enum"),
-        nullable=False, default=OrderStatus.pending
-    )
-    courier_id: Mapped[int | None] = mapped_column(
-        ForeignKey("couriers.courier_id", ondelete="SET NULL"), nullable=True
-    )
+    status: Mapped[OrderStatus] = mapped_column(SAEnum(OrderStatus, name="order_status_enum"), nullable=False, default=OrderStatus.pending)
+    courier_id: Mapped[int | None] = mapped_column(ForeignKey("couriers.courier_id", ondelete="SET NULL"), nullable=True)
     assign_time = mapped_column(TIMESTAMP(timezone=True), nullable=True)
     complete_time = mapped_column(TIMESTAMP(timezone=True), nullable=True)
 

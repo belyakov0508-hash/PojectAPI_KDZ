@@ -1,23 +1,20 @@
 from pydantic import BaseModel
-from enum import Enum
-
-
-class CourierTypeEnum(str, Enum):
-    foot = "foot"
-    bike = "bike"
-    car = "car"
 
 
 class CourierCreate(BaseModel):
     courier_id: int
-    courier_type: CourierTypeEnum
+    courier_type_id: int  # 1 = foot, 2 = bike, 3 = car
     working_hours: list[str]
     regions: list[int]
+    email: str
+    password: str
 
 
 class CourierResponse(BaseModel):
     courier_id: int
-    courier_type: CourierTypeEnum
+    courier_type_id: int
     working_hours: list[str]
+    email: str | None = None
+    password: str | None = None
 
     model_config = {"from_attributes": True}
