@@ -22,10 +22,9 @@ pip install -r backend/requirements.txt
 ```
 
 2. Создать файл `backend/.env`: DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/courier_db
-SECRET_KEY=your_secret_key
 3. Запустить сервер:
 ```bash
-uvicorn backend.main:app --reload
+uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ### Frontend
@@ -150,14 +149,6 @@ VALUES ('Admin@mail.ru', '12', 2, NOW());
 | GET | /api/monitoring/couriers | Диспетчер | Список курьеров |
 | POST | /api/monitoring/upload-couriers | Диспетчер | Загрузить JSON курьеров |
 | POST | /api/dispatcher/upload-orders | Диспетчер | Загрузить JSON заказов |
-
----
-
-## Запуск тестов
-
-```bash
-pytest -v
-```
 
 ---
 
