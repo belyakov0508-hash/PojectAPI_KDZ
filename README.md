@@ -8,7 +8,7 @@
 
 **Backend:** Python, FastAPI, SQLAlchemy, PostgreSQL, JWT  
 **Frontend:** React, Vite  
-**Тесты:** pytest, pytest-asyncio, httpx
+**Тесты:** pytest, pytest-asyncio, aiosqlite
 
 ---
 
