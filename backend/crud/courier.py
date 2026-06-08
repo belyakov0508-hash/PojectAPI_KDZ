@@ -57,28 +57,43 @@ async def update_courier(db: AsyncSession, courier_id: int, update_data: dict) -
 
 async def get_courier_rating(db: AsyncSession, courier_id: int) -> float | None:
     result = await db.execute(
-        select(
-            func.avg(
-                func.extract("epoch", Order.complete_time) -
-                func.extract("epoch", Order.assign_time)
-            )
-        )
+        select(Order)
         .filter(
             Order.courier_id == courier_id,
             Order.status == OrderStatus.completed,
             Order.complete_time.isnot(None),
-            Order.assign_time.isnot(None),
         )
-        .group_by(Order.region)
+        .order_by(Order.complete_time)
     )
-    averages = result.scalars().all()
+    completed_orders = result.scalars().all()
 
-    if not averages:
+    if not completed_orders:
         return None
 
-    t = min(averages)
-    rating = (3600 - min(t, 3600)) / 3600 * 5
-    return round(rating, 2)
+    region_times: dict[int, list[float]] = {}
+
+    for i, order in enumerate(completed_orders):
+        if i == 0:
+            if order.assign_time is None:
+                continue
+            delivery_time = (order.complete_time - order.assign_time).total_seconds()
+        else:
+            prev = completed_orders[i - 1]
+            if prev.complete_time is None:
+                continue
+            delivery_time = (order.complete_time - prev.complete_time).total_seconds()
+
+        region = order.region
+        if region not in region_times:
+            region_times[region] = []
+        region_times[region].append(delivery_time)
+
+    if not region_times:
+        return None
+
+    td = [sum(times) / len(times) for times in region_times.values()]
+    t = min(td)
+    return round((3600 - min(t, 3600)) / 3600 * 5, 2)
 
 
 async def get_courier_earnings(db: AsyncSession, courier_id: int) -> int | None:
