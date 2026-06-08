@@ -79,6 +79,97 @@ async def get_courier_orders_endpoint(
 ):
     return await get_courier_orders(db, courier_id)
 
+# Посмотреть свою статистику — только курьер
+@router.get("/my/stats")
+async def get_my_stats(
+    db: AsyncSession = Depends(get_db),
+    user: dict = Depends(require_courier),
+):
+    from sqlalchemy import select
+    from backend.models.order import Order
+    from backend.models.courier import Courier
+
+    courier_id = user["courier_id"]
+
+    # Получаем тип курьера
+    courier_result = await db.execute(
+        select(Courier).where(Courier.courier_id == courier_id)
+    )
+    courier = courier_result.scalar_one_or_none()
+    if not courier:
+        raise HTTPException(status_code=404, detail="Курьер не найден")
+
+    # Коэффициент зарплаты
+    c = {1: 2, 2: 5, 3: 9}.get(courier.courier_type_id, 0)
+
+    # Получаем все завершённые заказы курьера, отсортированные по времени завершения
+    result = await db.execute(
+        select(Order)
+        .where(Order.courier_id == courier_id, Order.status == "completed")
+        .order_by(Order.complete_time)
+    )
+    completed_orders = result.scalars().all()
+
+    if not completed_orders:
+        return {
+            "courier_id": courier_id,
+            "completed": 0,
+            "rating": None,
+            "earnings": 0,
+        }
+
+    # Зарплата
+    earnings = len(completed_orders) * 500 * c
+
+    # Рейтинг — считаем среднее время доставки по каждому региону
+    # td[i] = среднее время доставки заказов в районе i
+    region_times = {}  # region -> list of delivery times in seconds
+
+    for i, order in enumerate(completed_orders):
+        if order.complete_time is None:
+            continue
+
+        if i == 0:
+            # Первый заказ: время = complete_time - assign_time
+            if order.assign_time is None:
+                continue
+            delivery_time = (order.complete_time - order.assign_time).total_seconds()
+        else:
+            # Остальные: время = complete_time - complete_time предыдущего
+            prev = completed_orders[i - 1]
+            if prev.complete_time is None:
+                continue
+            delivery_time = (order.complete_time - prev.complete_time).total_seconds()
+
+        region = order.region
+        if region not in region_times:
+            region_times[region] = []
+        region_times[region].append(delivery_time)
+
+    if not region_times:
+        return {
+            "courier_id": courier_id,
+            "completed": len(completed_orders),
+            "rating": None,
+            "earnings": earnings,
+        }
+
+    # td[i] = среднее время по каждому региону
+    td = [sum(times) / len(times) for times in region_times.values()]
+
+    # t = минимальное из средних
+    t = min(td)
+
+    # Рейтинг
+    rating = round((3600 - min(t, 3600)) / 3600 * 5, 2)
+
+    return {
+        "courier_id": courier_id,
+        "completed": len(completed_orders),
+        "rating": rating,
+        "earnings": earnings,
+    }
+
 
 # Создать заказ — только диспетчер
 @router.post("/", response_model=OrderResponse)
