@@ -8,3 +8,6 @@ pydantic-settings==2.14.1
 asyncpg==0.31.0
 python-multipart==0.0.30
 pyjwt==2.13.0
+pytest==9.0.3
+pytest-asyncio==1.4.0
+aiosqlite==0.22.1
