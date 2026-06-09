@@ -16,34 +16,6 @@
 
 [Инструкция по установке](./Инструкция_запуска_API.docx)
 
-### Backend
-
-1. Установить зависимости:
-```bash
-pip install -r backend/requirements.txt
-```
-
-2. Создать файл `backend/.env`: DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/courier_db
-3. Запустить сервер:
-```bash
-uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-### Frontend
-
-1. Установить зависимости:
-```bash
-cd frontend
-npm install
-```
-
-2. Создать файл `frontend/.env`: VITE_API_URL=http://localhost:8000
-3. Запустить:
-```bash
-npm run dev
-```
-
----
 
 ## Роли
 
